@@ -4,9 +4,11 @@
   "name": "Activity",
   "version": "0.0.1",
   "publisher": "hyperpane",
-  "description": "The server's activity, as Activity Monitor or htop shows it: CPU per core, memory, GPU, network and disk, charted as they go, and its processes to sort, search and end.",
+  "description": "What your server is doing, as Activity Monitor or htop shows it: CPU per core, memory, GPU, network and disk, charted as they go, and its processes to sort, search and end.",
   "icon": "icon.svg",
   "category": "DevOps",
+  "homepage": "https://github.com/hyperpane/hp-activity",
+  "license": "MIT",
   "engines": { "hyperpane": ">=0.2.0", "node": ">=22.15.0" },
   "client": { "main": "main.tsx" },
   "server": { "runtime": "node", "main": "main.ts" },
@@ -22,7 +24,7 @@
   },
   "signature": {
     "key": "ed25519:5LgmP9NjLnpvz48igrFekSqi+4k6gzaO8sNwlsgNKFc=",
-    "sig": "BvTCZK5sFzMyfjQXSJWYDcPpZjrOIco1l56n5xBROx00T595f9tA4cUWteft9A+1pWWtyq+TE4n8CSsOpbzPAw==",
-    "server": "tKwpE2yJVztawh0wO4NKMY1GHKe3njnjqdpbjQ4OHZzhcNJ/z2fY2bI0Zeis8YgJbojhhYon7eIauUKNKj7BAA=="
+    "sig": "TmrL8TlO4xNDSQR5npik4cSmUjgawHvCFpyh5L05gHU93bJI4lSCu+a61U5mfmlzC4uIhXhiSCD5rgIHZikgAw==",
+    "server": "x7vesA5d/ORMcmoC480kLJVo5JJfSMDttbfK9f6Pe/AqWlYiX1ikPldgernQvBfa9pVMoOMxWJF37KJN2+3tAQ=="
   }
 }

@@ -1,0 +1,7 @@
+{
+  "accent": "#f2545b",
+  "tagline": "What your server is doing: CPU, memory, GPU, disk and processes.",
+  "chips": ["CPU", "Memory", "GPU", "Processes"],
+  "window": "Activity",
+  "illustration": "illustration.svg"
+}

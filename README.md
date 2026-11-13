@@ -1,21 +1,51 @@
+![Activity](media/banner.svg)
+
 # Activity
 
-The server's activity, as Activity Monitor or htop shows it.
+What your server is doing: CPU, memory, GPU, disk and processes. Activity
+shows the machine the app is connected to as Activity Monitor or htop
+would: every core charted over the last five minutes, and the processes
+behind the numbers, ready to end.
 
-- **Overview:** CPU (in all, and every core as a bar, with the load
-  average), memory (used and cached, swap), each GPU (how busy, its memory,
-  temperature and power when it says), network in and out, disk reads and
-  writes, and how full each volume is: charted over the last 5 minutes
-  (hover a chart for its values), with the busiest processes below.
-- **Processes:** every process with its CPU, memory, threads, user and
-  start; sort by any column, search by name, command or pid, only yours, or
-  as a tree under their parents. Select one to see its command line, and
-  **End** (SIGTERM) or **Force quit** (SIGKILL) it; both ask first.
+## Features
 
-Readings are taken every 2 seconds while a window shows them, and the last
-5 minutes are kept, so a window opened again shows what happened meanwhile.
+- **CPU:** in all and every core as a bar, with the load average.
+- **Memory:** used and cached, and swap.
+- **GPU:** each one's load, and its memory, temperature and power when it
+  says.
+- **Network and disk:** in and out, reads and writes, and how full each
+  volume is.
+- **Charts for the last 5 minutes:** hover one for its values.
+- **Busiest processes** on the overview, at a glance.
+- **Every process:** its CPU, memory, threads, user and start time; sort by
+  any column, search by name, command or pid, show only yours, or see them
+  as a tree under their parents.
+- **End or force quit** a process; both ask first.
 
-## Where the numbers come from
+## How to use
+
+1. Open Activity: **+** on the project, **New activity**, or right-click
+   the canvas.
+2. **Overview** shows the charts, with the busiest processes below. Click
+   **All** to see every process.
+3. On **Processes**, click a column's title to sort by it, type in the
+   search box to filter, tick **Mine** for your own, or switch to the tree.
+4. Select a process to see its command line, then **End** (SIGTERM) or
+   **Force quit** (SIGKILL) it.
+
+## Good to know
+
+- Readings are taken every 2 seconds while an Activity window is open, and
+  the last 5 minutes are kept: a window opened while another one is
+  showing starts with what's been read. With none open, nothing is read.
+- The server runs as you: other users' processes can be seen, not ended.
+- What a system can't say is left out, not shown as an error.
+- Works on macOS, Linux and Windows servers.
+
+## How it works
+
+The server part reads the numbers from the system itself, with no agent to
+install:
 
 | | macOS | Linux | Windows |
 | --- | --- | --- | --- |
@@ -27,11 +57,12 @@ Readings are taken every 2 seconds while a window shows them, and the last
 | Volumes | `df -kP` (the Data volume as /) | `df -kP` | CIM |
 | Processes | `ps` (its %CPU is recent) | `/proc/<pid>` (CPU since the last reading) | CIM `Win32_Process` |
 
-What a system can't say is left out, not an error. The server runs as you:
-processes of other users can be seen, not ended.
-
 ## Develop
 
 ```sh
 ./build.sh --test
 ```
+
+## License
+
+MIT, © 2026 Astralyx. See [LICENSE](LICENSE).
