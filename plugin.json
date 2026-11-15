@@ -9,22 +9,33 @@
   "category": "DevOps",
   "homepage": "https://github.com/hyperpane/hp-activity",
   "license": "MIT",
-  "engines": { "hyperpane": ">=0.2.0", "node": ">=22.15.0" },
-  "client": { "main": "main.tsx" },
-  "server": { "runtime": "node", "main": "main.ts" },
+  "engines": {
+    "hyperpane": ">=0.2.2",
+    "node": ">=22.15.0"
+  },
+  "client": {
+    "main": "main.tsx"
+  },
+  "server": {
+    "runtime": "node",
+    "main": "main.ts"
+  },
   "contributes": {
     "nodes": [
       {
         "kind": "activity",
         "title": "Activity",
         "icon": "icon.svg",
-        "size": [880, 620]
+        "size": [
+          880,
+          620
+        ]
       }
     ]
   },
   "signature": {
     "key": "ed25519:5LgmP9NjLnpvz48igrFekSqi+4k6gzaO8sNwlsgNKFc=",
-    "sig": "TmrL8TlO4xNDSQR5npik4cSmUjgawHvCFpyh5L05gHU93bJI4lSCu+a61U5mfmlzC4uIhXhiSCD5rgIHZikgAw==",
-    "server": "x7vesA5d/ORMcmoC480kLJVo5JJfSMDttbfK9f6Pe/AqWlYiX1ikPldgernQvBfa9pVMoOMxWJF37KJN2+3tAQ=="
+    "sig": "X34644hKhC7TrUtjffowZmtweV1MEh/KgkOhnqDvUowGue5l+fgTi09xwx+xc8yNMvXtzVDy/VQGh76GcSIEDQ==",
+    "server": "kUgKq7+cD4tWxir6KRSe6cf4qOwuUnPxahMdoVCB8zg3XO/cVP0Xm1U7nKs7BBa7jBSWlWeMy9mOmNOaOTPcCA=="
   }
 }

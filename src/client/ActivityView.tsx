@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { formatAgo, useHost } from '@hyperpane/sdk/client';
-import { NodeMessage, cn } from '@hyperpane/ui';
+import { NodeMessage, Tabs } from '@hyperpane/ui';
 import type { Machine, Sample, WatchEvent } from '../shared/index.ts';
 import { Overview } from './Overview.tsx';
 import { ID, pct, size } from './parts.tsx';
@@ -46,18 +46,16 @@ export function ActivityView() {
   return (
     <div className="flex h-full flex-col text-xs text-[var(--node-fg)]">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--node-border)] px-3 py-2">
-        <div className="rounded-control flex h-7 overflow-hidden border border-[var(--node-border)]">
-          {(['overview', 'processes'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              className={cn('px-3', tab === t ? 'bg-[color-mix(in_srgb,var(--node-accent)_22%,transparent)]' : 'text-[var(--node-muted)] hover:bg-[var(--node-hover)]')}
-            >
-              {t === 'overview' ? 'Overview' : 'Processes'}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          variant="pills"
+          label="View"
+          value={tab}
+          onValueChange={setTab}
+          items={[
+            { value: 'overview', label: 'Overview' },
+            { value: 'processes', label: 'Processes' },
+          ]}
+        />
         <span className="min-w-0 flex-1 truncate text-[var(--node-muted)]" title={`${machine.os} · ${machine.arch}`}>
           <span className="font-medium text-[var(--node-fg)]">{machine.hostname.replace(/\.local$/, '')}</span> · {machine.cpu} · {machine.cores} cores · {size(machine.memory)} · up{' '}
           {formatAgo(machine.bootedAt).replace(/ ago$/, '')}

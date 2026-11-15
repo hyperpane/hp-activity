@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, ListTree, Search, Skull, Square } from 'lucide-react';
 import { formatAgo, useHost } from '@hyperpane/sdk/client';
-import { NodeInput, NodeMessage, ToolButton, cn } from '@hyperpane/ui';
+import { Checkbox, ColumnResizer, NodeInput, NodeMessage, ToolButton, cn, styles, useColumnWidths } from '@hyperpane/ui';
 import type { Proc, Signal } from '../shared/index.ts';
 import { ID, pct, size, useProcs } from './parts.tsx';
 
@@ -61,12 +61,16 @@ export function Processes({ user }: { user: string }) {
       host.app.toast((e as Error).message, { error: true });
     }
   };
+  // Name takes what's left; the others are as wide as they were dragged
+  // (from their left edge, kept on this machine).
+  const cols = useColumnWidths('activity.processes', { pid: 64, user: 96, cpu: 64, mem: 80, threads: 64, started: 88 }, { min: 40, max: 400 });
   const head = (key: SortKey, title: string, cls = '') => (
-    <th className={cn('border-b border-[var(--node-border)] px-2 py-1.5 font-medium text-[var(--node-muted)] first:pl-3', cls)}>
+    <th className={cn('relative border-b border-[var(--node-border)] px-2 py-1.5 font-medium text-[var(--node-muted)] first:pl-3', cls)}>
       <button type="button" className="inline-flex items-center gap-0.5 hover:text-[var(--node-fg)]" onClick={() => setSort((s) => ({ key, desc: s.key === key ? !s.desc : key !== 'name' && key !== 'user' }))}>
         {title}
         {sort.key === key && (sort.desc ? <ArrowDown className="size-3" /> : <ArrowUp className="size-3" />)}
       </button>
+      {key !== 'name' && <ColumnResizer {...cols.resizer(key, 'start')} />}
     </th>
   );
 
@@ -77,10 +81,7 @@ export function Processes({ user }: { user: string }) {
           <Search className="absolute top-1.5 left-1.5 size-3 text-[var(--node-muted)]" />
           <NodeInput className="w-full pl-6" placeholder="Name, command or pid" value={find} onChange={(e) => setFind(e.target.value)} />
         </div>
-        <label className="flex items-center gap-1 text-[var(--node-muted)]">
-          <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} />
-          Mine
-        </label>
+        <Checkbox className="gap-1.5 text-xs text-[var(--node-muted)]" label="Mine" checked={mine} onCheckedChange={setMine} />
         <ToolButton label={tree ? 'A list' : 'A tree (by parent)'} icon={ListTree} active={tree} onClick={() => setTree(!tree)} />
         <span className="text-[var(--node-muted)]">{rows.length} processes</span>
         <ToolButton label="End (SIGTERM)" icon={Square} disabled={!sel} onClick={() => sel && void signal(sel, 'TERM', 'End')} />
@@ -90,14 +91,14 @@ export function Processes({ user }: { user: string }) {
         <table className="w-full table-fixed border-collapse">
           <colgroup>
             <col />
-            <col style={{ width: 64 }} />
-            <col style={{ width: 96 }} />
-            <col style={{ width: 64 }} />
-            <col style={{ width: 80 }} />
-            <col style={{ width: 64 }} />
-            <col style={{ width: 88 }} />
+            <col style={{ width: cols.widths.pid }} />
+            <col style={{ width: cols.widths.user }} />
+            <col style={{ width: cols.widths.cpu }} />
+            <col style={{ width: cols.widths.mem }} />
+            <col style={{ width: cols.widths.threads }} />
+            <col style={{ width: cols.widths.started }} />
           </colgroup>
-          <thead className="sticky top-0 z-10 bg-[var(--node-bg)] text-left">
+          <thead className={cn(styles.stickyTableHead, 'bg-[var(--node-bg)] text-left')}>
             <tr>
               {head('name', 'Name')}
               {head('pid', 'PID', 'text-right')}
