@@ -11,7 +11,7 @@ import { C, Card, Legend, pct, rate, size, useProcs } from './parts.tsx';
 
 export function Overview({ history, machine, onProcesses }: { history: Sample[]; machine: Machine; onProcesses(): void }) {
   const now = history.at(-1);
-  if (!now) return <NodeMessage>Reading…</NodeMessage>;
+  if (!now) return <NodeMessage>Reading</NodeMessage>;
   const s = <T,>(f: (x: Sample) => T) => history.map(f);
   const cores = now.cpu.cores;
   return (
@@ -112,7 +112,7 @@ function TopProcesses({ onAll }: { onAll(): void }) {
         </NodeButton>
       </header>
       {!list ? (
-        <p className="text-[var(--node-muted)]">Reading…</p>
+        <p className="text-[var(--node-muted)]">Reading</p>
       ) : (
         top.map((p) => (
           <div key={p.pid} className="flex items-center gap-2 py-0.5" title={p.command}>

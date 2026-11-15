@@ -40,7 +40,7 @@ export function ActivityView() {
   );
 
   if (error) return <NodeMessage error>{error}</NodeMessage>;
-  if (!machine) return <NodeMessage>Reading the server…</NodeMessage>;
+  if (!machine) return <NodeMessage>Reading the server</NodeMessage>;
   const now = history.at(-1);
 
   return (

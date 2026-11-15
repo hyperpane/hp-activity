@@ -50,10 +50,10 @@ export function Processes({ user }: { user: string }) {
     return out;
   }, [list, find, sort, tree, mine, user]);
 
-  if (!list) return <NodeMessage>Reading the processes…</NodeMessage>;
+  if (!list) return <NodeMessage>Reading the processes</NodeMessage>;
   const sel = list.find((p) => p.pid === selected) ?? null;
   const signal = async (p: Proc, sig: Signal, word: string) => {
-    if (!(await host.ui.confirm({ title: `${word} ${p.name} (${p.pid})?`, message: sig === 'KILL' ? 'It ends at once, without saving anything.' : 'It’s asked to end, and can save first.', confirm: word, destructive: true })))
+    if (!(await host.ui.confirm({ title: `${word} ${p.name} (${p.pid})?`, message: sig === 'KILL' ? 'It ends at once, without saving anything' : 'It’s asked to end, and can save first', confirm: word, destructive: true })))
       return;
     try {
       await host.call(ID, { op: 'signal', pid: p.pid, signal: sig });
