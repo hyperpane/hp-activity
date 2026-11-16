@@ -28,13 +28,21 @@ Pages occupied by compressor:                 137406.`;
 });
 
 test('Linux memory, network and disks from /proc', () => {
-  const m = linuxMemory('MemTotal:       16000000 kB\nMemFree:  1000000 kB\nMemAvailable:    6000000 kB\nBuffers:  100000 kB\nCached:  3000000 kB\nSwapTotal: 2000000 kB\nSwapFree: 1500000 kB\n');
+  const m = linuxMemory(
+    'MemTotal:       16000000 kB\nMemFree:  1000000 kB\nMemAvailable:    6000000 kB\nBuffers:  100000 kB\nCached:  3000000 kB\nSwapTotal: 2000000 kB\nSwapFree: 1500000 kB\n',
+  );
   assert.equal(m.total, 16000000 * 1024);
   assert.equal(m.used, 10000000 * 1024);
   assert.equal(m.swapUsed, 500000 * 1024);
-  const dev = 'Inter-|   Receive |  Transmit\n face |bytes    packets\n    lo: 999 1 0 0 0 0 0 0 999 1 0 0 0 0 0 0\n  eth0: 1000 10 0 0 0 0 0 0 2000 20 0 0 0 0 0 0\n wlan0: 5 1 0 0 0 0 0 0 7 1 0 0 0 0 0 0\n';
+  const dev =
+    'Inter-|   Receive |  Transmit\n face |bytes    packets\n    lo: 999 1 0 0 0 0 0 0 999 1 0 0 0 0 0 0\n  eth0: 1000 10 0 0 0 0 0 0 2000 20 0 0 0 0 0 0\n wlan0: 5 1 0 0 0 0 0 0 7 1 0 0 0 0 0 0\n';
   assert.deepEqual(linuxNet(dev), { rx: 1005, tx: 2007 });
-  const disks = ['   8       0 sda 100 0 10 0 50 0 20 0 0 0 0', '   8       1 sda1 100 0 10 0 50 0 20 0 0 0 0', ' 259       0 nvme0n1 1 0 4 0 1 0 6 0 0 0 0', '   7       0 loop0 1 0 999 0 1 0 999 0 0 0 0'].join('\n');
+  const disks = [
+    '   8       0 sda 100 0 10 0 50 0 20 0 0 0 0',
+    '   8       1 sda1 100 0 10 0 50 0 20 0 0 0 0',
+    ' 259       0 nvme0n1 1 0 4 0 1 0 6 0 0 0 0',
+    '   7       0 loop0 1 0 999 0 1 0 999 0 0 0 0',
+  ].join('\n');
   assert.deepEqual(linuxDisk(disks), { read: (10 + 4) * 512, write: (20 + 6) * 512 }, 'whole disks only: not partitions, not loops');
 });
 
@@ -46,7 +54,8 @@ en0        1500  <Link#11>   a4:fc:14:1a:2b:3c 1000000     0 900000000   800000 
 en0        1500  192.168.1     192.168.1.5     1000000     - 900000000   800000     - 100000000     -
 utun0      1380  <Link#18>                         10     0       1234        5     0        567     0`;
   assert.deepEqual(macNet(net), { rx: 900000000 + 1234, tx: 100000000 + 567 }, 'each interface once, not lo');
-  const io = '"Statistics" = {"Bytes (Read)"=0,"Bytes (Write)"=0}\n"Statistics" = {"Operations (Write)"=3,"Bytes (Read)"=477367275520,"Bytes (Write)"=677494067200}';
+  const io =
+    '"Statistics" = {"Bytes (Read)"=0,"Bytes (Write)"=0}\n"Statistics" = {"Operations (Write)"=3,"Bytes (Read)"=477367275520,"Bytes (Write)"=677494067200}';
   assert.deepEqual(macDisk(io), { read: 477367275520, write: 677494067200 });
 });
 
@@ -78,8 +87,23 @@ devfs                  359       359         0   100%    /dev
 test('processes: ps (names with spaces), /proc/<pid>/stat, etime', () => {
   assert.equal(etime('05:03'), 303);
   assert.equal(etime('2-01:00:00'), 2 * 86400 + 3600);
-  const list = psProcs('  1     0 root      0.3  12000 10-00:00:00\n 501   1 me       25.5 204800 01:00\n', '    1 /sbin/launchd\n  501 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome\n', '  501 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome --type=gpu\n', 1_000_000_000);
-  assert.deepEqual(list[1], { pid: 501, ppid: 1, name: 'Google Chrome', command: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --type=gpu', user: 'me', cpu: 25.5, mem: 204800 * 1024, threads: null, started: 1_000_000_000 - 60_000 });
+  const list = psProcs(
+    '  1     0 root      0.3  12000 10-00:00:00\n 501   1 me       25.5 204800 01:00\n',
+    '    1 /sbin/launchd\n  501 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome\n',
+    '  501 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome --type=gpu\n',
+    1_000_000_000,
+  );
+  assert.deepEqual(list[1], {
+    pid: 501,
+    ppid: 1,
+    name: 'Google Chrome',
+    command: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --type=gpu',
+    user: 'me',
+    cpu: 25.5,
+    mem: 204800 * 1024,
+    threads: null,
+    started: 1_000_000_000 - 60_000,
+  });
   const { name, f } = procStat('1234 (my (odd) proc) S 1 1234 1234 0 -1 4194560 100 0 0 0 250 50 0 0 20 0 7 0 5000 10000000 2500 18446744073709551615');
   assert.equal(name, 'my (odd) proc');
   assert.equal(f[1], '1', 'ppid');
@@ -104,7 +128,10 @@ test('on this machine: the machine, readings as they come, its processes', async
   const p = stream<Proc[]>(plugin, { op: 'processes' });
   const list = await p.next();
   p.cancel();
-  assert.ok(list.some((x) => x.pid === process.pid), 'this process is in the list');
+  assert.ok(
+    list.some((x) => x.pid === process.pid),
+    'this process is in the list',
+  );
 });
 
 test('signals: a real one ends a process; nonsense is refused', async () => {

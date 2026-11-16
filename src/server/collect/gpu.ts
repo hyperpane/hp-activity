@@ -35,7 +35,11 @@ let hasNvidia: boolean | null = null;
 
 export async function gpus(run: Run, cpuName: string): Promise<Gpu[]> {
   if (hasNvidia !== false) {
-    const out = await run('nvidia-smi', ['--query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw', '--format=csv,noheader,nounits'], 4000);
+    const out = await run(
+      'nvidia-smi',
+      ['--query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw', '--format=csv,noheader,nounits'],
+      4000,
+    );
     hasNvidia = out !== null;
     if (out) return nvidia(out);
   }

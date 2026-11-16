@@ -52,7 +52,9 @@ export function Overview({ history, machine, onProcesses }: { history: Sample[];
             <Chart series={[{ label: 'GPU', values: s((x) => x.gpus[i]?.util ?? 0), color: C.gpu }]} max={100} format={pct} />
             <Legend
               items={[
-                ...(g.memUsed != null ? [{ color: C.gpu, label: 'Memory', value: g.memTotal ? `${size(g.memUsed)} of ${size(g.memTotal)}` : size(g.memUsed) }] : []),
+                ...(g.memUsed != null
+                  ? [{ color: C.gpu, label: 'Memory', value: g.memTotal ? `${size(g.memUsed)} of ${size(g.memTotal)}` : size(g.memUsed) }]
+                  : []),
                 ...(g.temp != null ? [{ color: 'var(--ansi-3)', label: 'Temp', value: `${g.temp} °C` }] : []),
                 ...(g.power != null ? [{ color: 'var(--ansi-1)', label: 'Power', value: `${g.power.toFixed(0)} W` }] : []),
               ]}

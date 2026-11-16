@@ -5,4 +5,10 @@ import { mount } from '@hyperpane/sdk/client';
 import { NodeMessage } from '@hyperpane/ui';
 import { ActivityView } from './ActivityView.tsx';
 
-mount((host) => (host.view.type === 'node' && host.view.kind === 'activity' ? <ActivityView /> : <NodeMessage error>Activity has no “{host.view.type}” view here.</NodeMessage>));
+mount((host) =>
+  host.view.type === 'node' && host.view.kind === 'activity' ? (
+    <ActivityView />
+  ) : (
+    <NodeMessage error>Activity has no “{host.view.type}” view here.</NodeMessage>
+  ),
+);

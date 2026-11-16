@@ -57,8 +57,8 @@ export function ActivityView() {
           ]}
         />
         <span className="min-w-0 flex-1 truncate text-[var(--node-muted)]" title={`${machine.os} · ${machine.arch}`}>
-          <span className="font-medium text-[var(--node-fg)]">{machine.hostname.replace(/\.local$/, '')}</span> · {machine.cpu} · {machine.cores} cores · {size(machine.memory)} · up{' '}
-          {formatAgo(machine.bootedAt).replace(/ ago$/, '')}
+          <span className="font-medium text-[var(--node-fg)]">{machine.hostname.replace(/\.local$/, '')}</span> · {machine.cpu} · {machine.cores} cores ·{' '}
+          {size(machine.memory)} · up {formatAgo(machine.bootedAt).replace(/ ago$/, '')}
         </span>
         {now && (
           <span className="flex gap-3 text-[var(--node-muted)]">

@@ -98,7 +98,13 @@ export class Procs {
   async #linux(): Promise<Proc[]> {
     if (!this.#users) {
       const passwd = await readFile('/etc/passwd', 'utf8').catch(() => '');
-      this.#users = new Map(passwd.split('\n').map((l) => l.split(':')).filter((f) => f.length > 2).map((f) => [f[2], f[0]]));
+      this.#users = new Map(
+        passwd
+          .split('\n')
+          .map((l) => l.split(':'))
+          .filter((f) => f.length > 2)
+          .map((f) => [f[2], f[0]]),
+      );
       const stat = await readFile('/proc/stat', 'utf8').catch(() => '');
       this.#boot = Number(/^btime (\d+)/m.exec(stat)?.[1] ?? 0) * 1000;
     }

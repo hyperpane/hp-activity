@@ -29,7 +29,9 @@ export function Chart({
 }) {
   const [at, setAt] = useState<number | null>(null);
   const n = Math.max(2, ...series.map((s) => s.values.length));
-  const sums = stacked ? series.map((_, i) => Array.from({ length: n }, (_, j) => series.slice(0, i + 1).reduce((a, s) => a + (s.values[j] ?? 0), 0))) : series.map((s) => s.values);
+  const sums = stacked
+    ? series.map((_, i) => Array.from({ length: n }, (_, j) => series.slice(0, i + 1).reduce((a, s) => a + (s.values[j] ?? 0), 0)))
+    : series.map((s) => s.values);
   const top = max ?? niceTop(Math.max(1, ...sums.flat()));
   const W = 600;
   const H = 100;
@@ -39,7 +41,12 @@ export function Chart({
   const area = (vals: number[], below?: number[]) => {
     if (!vals.length) return '';
     const off = n - vals.length;
-    const base = below ? below.map((v, i) => `L${x(i + n - below.length).toFixed(1)},${y(v).toFixed(1)}`).reverse().join('') : `L${x(n - 1)},${H}L${x(off)},${H}`;
+    const base = below
+      ? below
+          .map((v, i) => `L${x(i + n - below.length).toFixed(1)},${y(v).toFixed(1)}`)
+          .reverse()
+          .join('')
+      : `L${x(n - 1)},${H}L${x(off)},${H}`;
     return `${path(vals)}${base}Z`;
   };
   return (
@@ -54,7 +61,17 @@ export function Chart({
     >
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
         {[0.25, 0.5, 0.75].map((g) => (
-          <line key={g} x1={0} x2={W} y1={H * g} y2={H * g} stroke="var(--node-border)" strokeWidth={1} vectorEffect="non-scaling-stroke" strokeDasharray="2 3" />
+          <line
+            key={g}
+            x1={0}
+            x2={W}
+            y1={H * g}
+            y2={H * g}
+            stroke="var(--node-border)"
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+            strokeDasharray="2 3"
+          />
         ))}
         {sums.map((vals, i) => (
           <path key={`a${i}`} d={area(vals, stacked && i > 0 ? sums[i - 1] : undefined)} fill={series[i].color} fillOpacity={0.18} />

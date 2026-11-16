@@ -8,13 +8,34 @@ import { cn } from '@hyperpane/ui';
 import type { Proc } from '../shared/index.ts';
 
 export const ID = 'activity';
-export const C = { cpu: 'var(--ansi-4)', mem: 'var(--ansi-5)', cached: 'var(--ansi-6)', gpu: 'var(--ansi-2)', rx: 'var(--ansi-2)', tx: 'var(--ansi-3)', read: 'var(--ansi-6)', write: 'var(--ansi-1)' };
+export const C = {
+  cpu: 'var(--ansi-4)',
+  mem: 'var(--ansi-5)',
+  cached: 'var(--ansi-6)',
+  gpu: 'var(--ansi-2)',
+  rx: 'var(--ansi-2)',
+  tx: 'var(--ansi-3)',
+  read: 'var(--ansi-6)',
+  write: 'var(--ansi-1)',
+};
 
 export const pct = (v: number) => `${v.toFixed(v < 10 ? 1 : 0)}%`;
 export const rate = (v: number) => `${formatSize(v)}/s`;
 export const size = (v: number) => formatSize(v);
 
-export function Card({ icon: Icon, title, value, children, className }: { icon: React.ComponentType<{ className?: string }>; title: string; value?: React.ReactNode; children: React.ReactNode; className?: string }) {
+export function Card({
+  icon: Icon,
+  title,
+  value,
+  children,
+  className,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  value?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <section className={cn('flex min-w-0 flex-col gap-1.5 rounded-lg border border-[var(--node-border)] p-2.5', className)}>
       <header className="flex items-center gap-1.5">

@@ -14,7 +14,12 @@ export function dfVolumes(out: string): Volume[] {
     if (f.length < 6) continue;
     const [fs, blocks, used] = f;
     const mount = f.slice(5).join(' ');
-    if (!fs.startsWith('/dev/') || /^\/(System\/Volumes\/(VM|Preboot|Update|xarts|iSCPreboot|Hardware)|dev|boot\/efi)/.test(mount) || mount.startsWith('/snap/')) continue;
+    if (
+      !fs.startsWith('/dev/') ||
+      /^\/(System\/Volumes\/(VM|Preboot|Update|xarts|iSCPreboot|Hardware)|dev|boot\/efi)/.test(mount) ||
+      mount.startsWith('/snap/')
+    )
+      continue;
     list.push({ mount, size: Number(blocks) * 1024, used: Number(used) * 1024 });
   }
   // macOS: the system volume (/) is sealed and small; what you use is its
@@ -28,7 +33,11 @@ export function dfVolumes(out: string): Volume[] {
 
 export async function volumes(run: Run): Promise<Volume[]> {
   if (PLATFORM === 'win32') {
-    const out = await run('powershell', ['-NoProfile', '-Command', 'Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object { "{0}|{1}|{2}" -f $_.DeviceID,$_.Size,$_.FreeSpace }']);
+    const out = await run('powershell', [
+      '-NoProfile',
+      '-Command',
+      'Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3" | ForEach-Object { "{0}|{1}|{2}" -f $_.DeviceID,$_.Size,$_.FreeSpace }',
+    ]);
     return (out ?? '')
       .trim()
       .split('\n')

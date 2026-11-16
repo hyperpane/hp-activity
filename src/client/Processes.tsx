@@ -23,7 +23,9 @@ export function Processes({ user }: { user: string }) {
   const rows = useMemo(() => {
     if (!list) return [];
     const q = find.trim().toLowerCase();
-    let l = list.filter((p) => (!q || p.name.toLowerCase().includes(q) || p.command.toLowerCase().includes(q) || String(p.pid) === q) && (!mine || p.user === user));
+    let l = list.filter(
+      (p) => (!q || p.name.toLowerCase().includes(q) || p.command.toLowerCase().includes(q) || String(p.pid) === q) && (!mine || p.user === user),
+    );
     const dir = sort.desc ? -1 : 1;
     const cmp = (a: Proc, b: Proc) => {
       const x = a[sort.key] ?? 0;
@@ -53,7 +55,14 @@ export function Processes({ user }: { user: string }) {
   if (!list) return <NodeMessage>Reading the processes</NodeMessage>;
   const sel = list.find((p) => p.pid === selected) ?? null;
   const signal = async (p: Proc, sig: Signal, word: string) => {
-    if (!(await host.ui.confirm({ title: `${word} ${p.name} (${p.pid})?`, message: sig === 'KILL' ? 'It ends at once, without saving anything' : 'It’s asked to end, and can save first', confirm: word, destructive: true })))
+    if (
+      !(await host.ui.confirm({
+        title: `${word} ${p.name} (${p.pid})?`,
+        message: sig === 'KILL' ? 'It ends at once, without saving anything' : 'It’s asked to end, and can save first',
+        confirm: word,
+        destructive: true,
+      }))
+    )
       return;
     try {
       await host.call(ID, { op: 'signal', pid: p.pid, signal: sig });
@@ -66,7 +75,11 @@ export function Processes({ user }: { user: string }) {
   const cols = useColumnWidths('activity.processes', { pid: 64, user: 96, cpu: 64, mem: 80, threads: 64, started: 88 }, { min: 40, max: 400 });
   const head = (key: SortKey, title: string, cls = '') => (
     <th className={cn('relative border-b border-[var(--node-border)] px-2 py-1.5 font-medium text-[var(--node-muted)] first:pl-3', cls)}>
-      <button type="button" className="inline-flex items-center gap-0.5 hover:text-[var(--node-fg)]" onClick={() => setSort((s) => ({ key, desc: s.key === key ? !s.desc : key !== 'name' && key !== 'user' }))}>
+      <button
+        type="button"
+        className="inline-flex items-center gap-0.5 hover:text-[var(--node-fg)]"
+        onClick={() => setSort((s) => ({ key, desc: s.key === key ? !s.desc : key !== 'name' && key !== 'user' }))}
+      >
         {title}
         {sort.key === key && (sort.desc ? <ArrowDown className="size-3" /> : <ArrowUp className="size-3" />)}
       </button>
@@ -114,7 +127,10 @@ export function Processes({ user }: { user: string }) {
               <tr
                 key={p.pid}
                 onClick={() => setSelected(p.pid)}
-                className={cn('cursor-default border-b border-[var(--node-border)]', selected === p.pid ? 'bg-[var(--node-selection,var(--node-hover))]' : 'hover:bg-[var(--node-hover)]')}
+                className={cn(
+                  'cursor-default border-b border-[var(--node-border)]',
+                  selected === p.pid ? 'bg-[var(--node-selection,var(--node-hover))]' : 'hover:bg-[var(--node-hover)]',
+                )}
                 title={p.command}
               >
                 <td className="truncate px-2 py-1 pl-3" style={{ paddingLeft: 12 + depth * 12 }}>
