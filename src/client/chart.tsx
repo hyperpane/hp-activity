@@ -61,33 +61,25 @@ export function Chart({
     >
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
         {[0.25, 0.5, 0.75].map((g) => (
-          <line
-            key={g}
-            x1={0}
-            x2={W}
-            y1={H * g}
-            y2={H * g}
-            stroke="var(--node-border)"
-            strokeWidth={1}
-            vectorEffect="non-scaling-stroke"
-            strokeDasharray="2 3"
-          />
+          <line key={g} x1={0} x2={W} y1={H * g} y2={H * g} stroke="var(--node-border)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
         ))}
         {sums.map((vals, i) => (
-          <path key={`a${i}`} d={area(vals, stacked && i > 0 ? sums[i - 1] : undefined)} fill={series[i].color} fillOpacity={0.18} />
+          <path key={`a${i}`} d={area(vals, stacked && i > 0 ? sums[i - 1] : undefined)} fill={series[i].color} fillOpacity={0.12} />
         ))}
         {sums.map((vals, i) => (
-          <path key={`l${i}`} d={path(vals)} fill="none" stroke={series[i].color} strokeWidth={1.5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+          <path key={`l${i}`} d={path(vals)} fill="none" stroke={series[i].color} strokeWidth={1.25} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
         ))}
-        {at !== null && <line x1={x(at)} x2={x(at)} y1={0} y2={H} stroke="var(--node-muted)" strokeWidth={1} vectorEffect="non-scaling-stroke" />}
+        {at !== null && (
+          <line x1={x(at)} x2={x(at)} y1={0} y2={H} stroke="var(--node-muted)" strokeWidth={1} strokeOpacity={0.6} vectorEffect="non-scaling-stroke" />
+        )}
       </svg>
-      <span className="absolute top-0 right-1 text-[10px] text-[var(--node-muted)]">{format(top)}</span>
+      <span className="absolute -top-0.5 right-0 text-2xs leading-none text-[var(--node-muted)] tabular-nums">{format(top)}</span>
       {at !== null && (
-        <div className="pointer-events-none absolute top-1 left-1 rounded border border-[var(--node-border)] bg-[var(--node-bg)] px-1.5 py-0.5 text-[10px] shadow-sm">
+        <div className="rounded-control pointer-events-none absolute top-1 left-1 flex flex-col gap-0.5 bg-[var(--popover)] px-2 py-1.5 text-2xs text-[var(--popover-foreground)] tabular-nums">
           {series.map((s) => {
             const v = s.values[at - (n - s.values.length)];
             return (
-              <div key={s.label} className="flex items-center gap-1">
+              <div key={s.label} className="flex items-center gap-1.5">
                 <span className="size-1.5 rounded-full" style={{ background: s.color }} />
                 {s.label} {v === undefined ? '—' : format(v)}
               </div>
@@ -110,7 +102,7 @@ function niceTop(v: number): number {
 /** A bar, 0 to 100 (htop's per-core meters). */
 export function Bar({ value, color, title }: { value: number; color: string; title?: string }) {
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--node-fg)_10%,transparent)]" title={title}>
+    <div className="h-1 w-full min-w-0 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--node-fg)_8%,transparent)]" title={title}>
       <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.min(100, Math.max(0, value))}%`, background: color }} />
     </div>
   );

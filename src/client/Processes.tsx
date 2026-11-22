@@ -6,9 +6,9 @@
 import { useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, ListTree, Search, Skull, Square } from 'lucide-react';
 import { formatAgo, useHost } from '@hyperpane/sdk/client';
-import { Checkbox, ColumnResizer, NodeInput, NodeMessage, ToolButton, cn, styles, useColumnWidths, useCompact } from '@hyperpane/ui';
+import { Checkbox, ColumnResizer, NodeInput, ToolButton, Toolbar, ToolbarSeparator, cn, styles, useColumnWidths, useCompact } from '@hyperpane/ui';
 import type { Proc, Signal } from '../shared/index.ts';
-import { ID, pct, size, useProcs } from './parts.tsx';
+import { ID, State, pct, size, useProcs } from './parts.tsx';
 
 type SortKey = 'name' | 'pid' | 'user' | 'cpu' | 'mem' | 'threads' | 'started';
 
@@ -55,7 +55,7 @@ export function Processes({ user }: { user: string }) {
   }, [list, find, sort, tree, mine, user]);
 
   const cols = useColumnWidths('activity.processes', { pid: 64, user: 96, cpu: 64, mem: 80, threads: 64, started: 88 }, { min: 40, max: 400 });
-  if (!list) return <NodeMessage>Reading the processes</NodeMessage>;
+  if (!list) return <State title="Reading the processes" />;
   const sel = list.find((p) => p.pid === selected) ?? null;
   const signal = async (p: Proc, sig: Signal, word: string) => {
     if (
@@ -76,10 +76,19 @@ export function Processes({ user }: { user: string }) {
   // Name takes what's left; the others are as wide as they were dragged
   // (from their left edge, kept on this machine).
   const head = (key: SortKey, title: string, cls = '') => (
-    <th className={cn('relative border-b border-[var(--node-border)] px-2 py-1.5 font-medium text-[var(--node-muted)] first:pl-3', cls)}>
+    // Each cell holds to the top itself, on the window's ground, with that
+    // ground reaching a couple of pixels above it too: no row shows through
+    // between the bar and the names however the pixels round.
+    <th
+      className={cn(
+        'sticky top-0 z-10 h-7 bg-[var(--node-bg)] px-2 font-medium text-[var(--node-muted)] shadow-[inset_0_-1px_0_var(--node-border)]',
+        'before:pointer-events-none before:absolute before:inset-x-0 before:-top-1 before:h-1 before:bg-[var(--node-bg)]',
+        cls,
+      )}
+    >
       <button
         type="button"
-        className="inline-flex items-center gap-0.5 hover:text-[var(--node-fg)]"
+        className={cn('rounded-chip inline-flex items-center gap-1 transition-colors duration-100 hover:text-[var(--node-fg)]', styles.focusRing)}
         onClick={() => setSort((s) => ({ key, desc: s.key === key ? !s.desc : key !== 'name' && key !== 'user' }))}
       >
         {title}
@@ -89,21 +98,23 @@ export function Processes({ user }: { user: string }) {
     </th>
   );
 
+  const td = 'h-7 truncate px-2 touch:h-10';
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--node-border)] px-3 py-1.5">
+      <Toolbar>
         <div className="relative min-w-32 flex-1">
-          <Search className="absolute top-1/2 left-1.5 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput className="w-full pl-6" placeholder="Name, command or pid" value={find} onChange={(e) => setFind(e.target.value)} />
+          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
+          <NodeInput className="w-full pl-7" placeholder="Name, command or pid" value={find} onChange={(e) => setFind(e.target.value)} />
         </div>
-        <Checkbox className="gap-1.5 text-xs text-[var(--node-muted)]" label="Mine" checked={mine} onCheckedChange={setMine} />
+        <Checkbox className="ms-1 flex-none gap-1.5 text-xs text-[var(--node-muted)]" label="Mine" checked={mine} onCheckedChange={setMine} />
         <ToolButton label={tree ? 'A list' : 'A tree (by parent)'} icon={ListTree} active={tree} onClick={() => setTree(!tree)} />
-        <span className="text-[var(--node-muted)]">{rows.length} processes</span>
+        <span className="mx-1 flex-none text-2xs text-[var(--node-muted)] tabular-nums max-sm:hidden">{rows.length} processes</span>
+        <ToolbarSeparator />
         <ToolButton label="End (SIGTERM)" icon={Square} disabled={!sel} onClick={() => sel && void signal(sel, 'TERM', 'End')} />
         <ToolButton label="Force quit (SIGKILL)" icon={Skull} disabled={!sel} onClick={() => sel && void signal(sel, 'KILL', 'Force quit')} />
-      </div>
-      <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full table-fixed border-collapse">
+      </Toolbar>
+      <div className="min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
+        <table className="w-full table-fixed border-separate border-spacing-0">
           <colgroup>
             <col />
             <col style={{ width: cols.widths.pid }} />
@@ -113,7 +124,7 @@ export function Processes({ user }: { user: string }) {
             {wide && <col style={{ width: cols.widths.threads }} />}
             {wide && <col style={{ width: cols.widths.started }} />}
           </colgroup>
-          <thead className={cn(styles.stickyTableHead, 'bg-[var(--node-bg)] text-left')}>
+          <thead className="text-left">
             <tr>
               {head('name', 'Name')}
               {head('pid', 'PID', 'text-right')}
@@ -130,31 +141,32 @@ export function Processes({ user }: { user: string }) {
                 key={p.pid}
                 onClick={() => setSelected(p.pid)}
                 className={cn(
-                  'cursor-default border-b border-[var(--node-border)] touch:[&>td]:py-2.5',
-                  selected === p.pid ? 'bg-[var(--node-selection,var(--node-hover))]' : 'hover:bg-[var(--node-hover)]',
+                  'cursor-default [&>td:first-child]:rounded-s-control [&>td:last-child]:rounded-e-control',
+                  selected === p.pid ? '[&>td]:bg-[var(--node-selection,var(--node-hover))]' : 'hover:[&>td]:bg-[var(--node-hover)]',
                 )}
                 title={p.command}
               >
-                <td className="truncate px-2 py-1 pl-3" style={{ paddingLeft: 12 + depth * 12 }}>
+                <td className={td} style={{ paddingLeft: 8 + depth * 12 }}>
                   <span className="font-medium">{p.name}</span>
                 </td>
-                <td className="truncate px-2 py-1 text-right text-[var(--node-muted)] tabular-nums">{p.pid}</td>
-                {wide && <td className="truncate px-2 py-1 text-[var(--node-muted)]">{p.user}</td>}
-                <td className={cn('px-2 py-1 text-right tabular-nums', p.cpu > 50 && 'text-[var(--ansi-3)]')}>{pct(p.cpu)}</td>
-                <td className="px-2 py-1 text-right tabular-nums">{size(p.mem)}</td>
-                {wide && <td className="px-2 py-1 text-right text-[var(--node-muted)] tabular-nums">{p.threads ?? ''}</td>}
-                {wide && <td className="truncate px-2 py-1 text-right text-[var(--node-muted)]">{p.started ? formatAgo(p.started) : ''}</td>}
+                <td className={cn(td, 'text-right text-[var(--node-muted)] tabular-nums')}>{p.pid}</td>
+                {wide && <td className={cn(td, 'text-[var(--node-muted)]')}>{p.user}</td>}
+                <td className={cn(td, 'text-right tabular-nums', p.cpu > 50 && 'text-[var(--ansi-3)]')}>{pct(p.cpu)}</td>
+                <td className={cn(td, 'text-right tabular-nums')}>{size(p.mem)}</td>
+                {wide && <td className={cn(td, 'text-right text-[var(--node-muted)] tabular-nums')}>{p.threads ?? ''}</td>}
+                {wide && <td className={cn(td, 'text-right text-[var(--node-muted)]')}>{p.started ? formatAgo(p.started) : ''}</td>}
               </tr>
             ))}
           </tbody>
         </table>
+        {!rows.length && <p className="px-2 py-3 text-[var(--node-muted)]">No processes match</p>}
       </div>
       {sel && (
-        <div className="flex items-center gap-2 border-t border-[var(--node-border)] px-3 py-1.5">
-          <span className="min-w-0 flex-1 truncate font-mono text-[11px] select-text" title={sel.command}>
+        <div className="flex h-8 flex-none items-center gap-3 border-t border-[var(--node-border)] px-3 touch:h-10">
+          <span className="min-w-0 flex-1 truncate font-mono text-2xs select-text" title={sel.command}>
             {sel.command}
           </span>
-          <span className="flex-none text-[var(--node-muted)]">parent {sel.ppid}</span>
+          <span className="flex-none text-2xs text-[var(--node-muted)] tabular-nums">parent {sel.ppid}</span>
         </div>
       )}
     </div>

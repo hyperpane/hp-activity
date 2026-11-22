@@ -8,10 +8,10 @@
 
 import { useEffect, useState } from 'react';
 import { formatAgo, useHost } from '@hyperpane/sdk/client';
-import { NodeMessage, Tabs } from '@hyperpane/ui';
+import { Tabs, Toolbar } from '@hyperpane/ui';
 import type { Machine, Sample, WatchEvent } from '../shared/index.ts';
 import { Overview } from './Overview.tsx';
-import { ID, pct, size } from './parts.tsx';
+import { ID, State, pct, size } from './parts.tsx';
 import { Processes } from './Processes.tsx';
 
 type Tab = 'overview' | 'processes';
@@ -39,13 +39,18 @@ export function ActivityView() {
     [host],
   );
 
-  if (error) return <NodeMessage error>{error}</NodeMessage>;
-  if (!machine) return <NodeMessage>Reading the server</NodeMessage>;
+  if (error)
+    return (
+      <State error title="Can’t read the server">
+        {error}
+      </State>
+    );
+  if (!machine) return <State title="Reading the server" />;
   const now = history.at(-1);
 
   return (
     <div className="flex h-full flex-col text-xs text-[var(--node-fg)]">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--node-border)] px-3 py-2">
+      <Toolbar className="gap-3">
         <Tabs
           variant="pills"
           label="View"
@@ -56,26 +61,27 @@ export function ActivityView() {
             { value: 'processes', label: 'Processes' },
           ]}
         />
-        <span className="min-w-0 flex-1 truncate text-[var(--node-muted)]" title={`${machine.os} · ${machine.arch}`}>
+        <span className="min-w-0 flex-1 truncate text-2xs text-[var(--node-muted)]" title={`${machine.os} · ${machine.arch}`}>
           <span className="font-medium text-[var(--node-fg)]">{machine.hostname.replace(/\.local$/, '')}</span> · {machine.cpu} · {machine.cores} cores ·{' '}
           {size(machine.memory)} · up {formatAgo(machine.bootedAt).replace(/ ago$/, '')}
         </span>
+        {/* The overview's cards say these too: a narrow window does without. */}
         {now && (
-          <span className="flex gap-3 text-[var(--node-muted)]">
+          <span className="flex flex-none gap-3 text-2xs text-[var(--node-muted)] tabular-nums max-sm:hidden">
             <span>
-              CPU <b className="text-[var(--node-fg)]">{pct(now.cpu.total)}</b>
+              CPU <span className="font-medium text-[var(--node-fg)]">{pct(now.cpu.total)}</span>
             </span>
             <span>
-              Memory <b className="text-[var(--node-fg)]">{pct((now.mem.used / now.mem.total) * 100)}</b>
+              Memory <span className="font-medium text-[var(--node-fg)]">{pct((now.mem.used / now.mem.total) * 100)}</span>
             </span>
             {now.gpus[0]?.util != null && (
               <span>
-                GPU <b className="text-[var(--node-fg)]">{pct(now.gpus[0].util)}</b>
+                GPU <span className="font-medium text-[var(--node-fg)]">{pct(now.gpus[0].util)}</span>
               </span>
             )}
           </span>
         )}
-      </div>
+      </Toolbar>
       {tab === 'overview' ? <Overview history={history} machine={machine} onProcesses={() => setTab('processes')} /> : <Processes user={machine.user} />}
     </div>
   );
