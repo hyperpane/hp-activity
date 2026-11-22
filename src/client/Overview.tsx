@@ -16,7 +16,7 @@ export function Overview({ history, machine, onProcesses }: { history: Sample[];
   const cores = now.cpu.cores;
   return (
     <div className="min-h-0 flex-1 overflow-auto p-2">
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-2">
         <Card icon={Cpu} title="CPU" value={`${pct(now.cpu.total)} · load ${now.cpu.load.map((l) => l.toFixed(2)).join(' ')}`} className="row-span-2">
           <Chart series={[{ label: 'CPU', values: s((x) => x.cpu.total), color: C.cpu }]} max={100} format={pct} />
           <div className={cn('grid gap-x-3 gap-y-1', cores.length > 8 ? 'grid-cols-2' : 'grid-cols-1')}>
@@ -117,9 +117,9 @@ function TopProcesses({ onAll }: { onAll(): void }) {
         <p className="text-[var(--node-muted)]">Reading</p>
       ) : (
         top.map((p) => (
-          <div key={p.pid} className="flex items-center gap-2 py-0.5" title={p.command}>
-            <span className="w-40 truncate font-medium">{p.name}</span>
-            <span className="w-14 text-right text-[var(--node-muted)] tabular-nums">{p.pid}</span>
+          <div key={p.pid} className="flex items-center gap-2 py-0.5 touch:py-1.5" title={p.command}>
+            <span className="w-40 flex-none truncate font-medium max-sm:w-28">{p.name}</span>
+            <span className="w-14 flex-none text-right text-[var(--node-muted)] tabular-nums max-sm:hidden">{p.pid}</span>
             <Bar value={p.cpu / 1} color={C.cpu} />
             <span className="w-14 flex-none text-right tabular-nums">{pct(p.cpu)}</span>
             <span className="w-16 flex-none text-right text-[var(--node-muted)] tabular-nums">{size(p.mem)}</span>

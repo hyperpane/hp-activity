@@ -2,7 +2,7 @@
   "manifest": 1,
   "id": "activity",
   "name": "Activity",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "hyperpane",
   "description": "What your server is doing, as Activity Monitor or htop shows it: CPU per core, memory, GPU, network and disk, charted as they go, and its processes to sort, search and end.",
   "icon": "icon.svg",
@@ -35,7 +35,7 @@
   },
   "signature": {
     "key": "ed25519:5LgmP9NjLnpvz48igrFekSqi+4k6gzaO8sNwlsgNKFc=",
-    "sig": "I+qbMrUG/MI8EUQgGqAQj/DB7daAtSHE1qq+wBupx4+po88VpwsU70OBw/z/nkGPQWm+bQJ/NR+VCi/naInRDQ==",
-    "server": "WLbXqnHcVpToEnFPO/aUmxvKswKTta/Su+czn9pKY7xN1u/+9Fv/lpbcbYA5swfiKZUG99t7S5B5l2p8pGksBQ=="
+    "sig": "XG8ov/KZFwKaF87kOpSZc/cMe/upg8td7pripHxkLxAdmY/gG6ntv8tG3FJJCyjd6Mvq3sHhnBPgWhZ8xebBBg==",
+    "server": "N7ipamps3sz0F4H3/f2FunKkwKsAvRWrcO4FbqOCqTUNpM8ZBUwgH55qAc2k2tCn84O+wMuRpu2f3Sxks8WKCA=="
   }
 }

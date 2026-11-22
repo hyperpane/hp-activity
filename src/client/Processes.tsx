@@ -1,11 +1,12 @@
 // Every process on the server in one table: sorted by any column, searched
 // by name, command or pid, only yours, or as a tree by parent; the chosen
-// one's command, and End (SIGTERM) or Force quit (SIGKILL).
+// one's command, and End (SIGTERM) or Force quit (SIGKILL). A narrow window
+// does without the user, threads and start columns.
 
 import { useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, ListTree, Search, Skull, Square } from 'lucide-react';
 import { formatAgo, useHost } from '@hyperpane/sdk/client';
-import { Checkbox, ColumnResizer, NodeInput, NodeMessage, ToolButton, cn, styles, useColumnWidths } from '@hyperpane/ui';
+import { Checkbox, ColumnResizer, NodeInput, NodeMessage, ToolButton, cn, styles, useColumnWidths, useCompact } from '@hyperpane/ui';
 import type { Proc, Signal } from '../shared/index.ts';
 import { ID, pct, size, useProcs } from './parts.tsx';
 
@@ -19,6 +20,7 @@ export function Processes({ user }: { user: string }) {
   const [tree, setTree] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [mine, setMine] = useState(false);
+  const wide = !useCompact();
 
   const rows = useMemo(() => {
     if (!list) return [];
@@ -52,6 +54,7 @@ export function Processes({ user }: { user: string }) {
     return out;
   }, [list, find, sort, tree, mine, user]);
 
+  const cols = useColumnWidths('activity.processes', { pid: 64, user: 96, cpu: 64, mem: 80, threads: 64, started: 88 }, { min: 40, max: 400 });
   if (!list) return <NodeMessage>Reading the processes</NodeMessage>;
   const sel = list.find((p) => p.pid === selected) ?? null;
   const signal = async (p: Proc, sig: Signal, word: string) => {
@@ -72,7 +75,6 @@ export function Processes({ user }: { user: string }) {
   };
   // Name takes what's left; the others are as wide as they were dragged
   // (from their left edge, kept on this machine).
-  const cols = useColumnWidths('activity.processes', { pid: 64, user: 96, cpu: 64, mem: 80, threads: 64, started: 88 }, { min: 40, max: 400 });
   const head = (key: SortKey, title: string, cls = '') => (
     <th className={cn('relative border-b border-[var(--node-border)] px-2 py-1.5 font-medium text-[var(--node-muted)] first:pl-3', cls)}>
       <button
@@ -91,7 +93,7 @@ export function Processes({ user }: { user: string }) {
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--node-border)] px-3 py-1.5">
         <div className="relative min-w-32 flex-1">
-          <Search className="absolute top-1.5 left-1.5 size-3 text-[var(--node-muted)]" />
+          <Search className="absolute top-1/2 left-1.5 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
           <NodeInput className="w-full pl-6" placeholder="Name, command or pid" value={find} onChange={(e) => setFind(e.target.value)} />
         </div>
         <Checkbox className="gap-1.5 text-xs text-[var(--node-muted)]" label="Mine" checked={mine} onCheckedChange={setMine} />
@@ -105,21 +107,21 @@ export function Processes({ user }: { user: string }) {
           <colgroup>
             <col />
             <col style={{ width: cols.widths.pid }} />
-            <col style={{ width: cols.widths.user }} />
+            {wide && <col style={{ width: cols.widths.user }} />}
             <col style={{ width: cols.widths.cpu }} />
             <col style={{ width: cols.widths.mem }} />
-            <col style={{ width: cols.widths.threads }} />
-            <col style={{ width: cols.widths.started }} />
+            {wide && <col style={{ width: cols.widths.threads }} />}
+            {wide && <col style={{ width: cols.widths.started }} />}
           </colgroup>
           <thead className={cn(styles.stickyTableHead, 'bg-[var(--node-bg)] text-left')}>
             <tr>
               {head('name', 'Name')}
               {head('pid', 'PID', 'text-right')}
-              {head('user', 'User')}
+              {wide && head('user', 'User')}
               {head('cpu', 'CPU', 'text-right')}
               {head('mem', 'Memory', 'text-right')}
-              {head('threads', 'Threads', 'text-right')}
-              {head('started', 'Started', 'text-right')}
+              {wide && head('threads', 'Threads', 'text-right')}
+              {wide && head('started', 'Started', 'text-right')}
             </tr>
           </thead>
           <tbody>
@@ -128,7 +130,7 @@ export function Processes({ user }: { user: string }) {
                 key={p.pid}
                 onClick={() => setSelected(p.pid)}
                 className={cn(
-                  'cursor-default border-b border-[var(--node-border)]',
+                  'cursor-default border-b border-[var(--node-border)] touch:[&>td]:py-2.5',
                   selected === p.pid ? 'bg-[var(--node-selection,var(--node-hover))]' : 'hover:bg-[var(--node-hover)]',
                 )}
                 title={p.command}
@@ -137,11 +139,11 @@ export function Processes({ user }: { user: string }) {
                   <span className="font-medium">{p.name}</span>
                 </td>
                 <td className="truncate px-2 py-1 text-right text-[var(--node-muted)] tabular-nums">{p.pid}</td>
-                <td className="truncate px-2 py-1 text-[var(--node-muted)]">{p.user}</td>
+                {wide && <td className="truncate px-2 py-1 text-[var(--node-muted)]">{p.user}</td>}
                 <td className={cn('px-2 py-1 text-right tabular-nums', p.cpu > 50 && 'text-[var(--ansi-3)]')}>{pct(p.cpu)}</td>
                 <td className="px-2 py-1 text-right tabular-nums">{size(p.mem)}</td>
-                <td className="px-2 py-1 text-right text-[var(--node-muted)] tabular-nums">{p.threads ?? ''}</td>
-                <td className="truncate px-2 py-1 text-right text-[var(--node-muted)]">{p.started ? formatAgo(p.started) : ''}</td>
+                {wide && <td className="px-2 py-1 text-right text-[var(--node-muted)] tabular-nums">{p.threads ?? ''}</td>}
+                {wide && <td className="truncate px-2 py-1 text-right text-[var(--node-muted)]">{p.started ? formatAgo(p.started) : ''}</td>}
               </tr>
             ))}
           </tbody>
