@@ -4,9 +4,9 @@
 // does without the user, threads and start columns.
 
 import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, ListTree, Search, Skull, Square } from 'lucide-react';
+import { ArrowDown, ArrowUp, ListTree, Power, Search, Skull } from '@hyperpane/icons';
 import { formatAgo, useHost } from '@hyperpane/sdk/client';
-import { Checkbox, ColumnResizer, NodeInput, ToolButton, Toolbar, ToolbarSeparator, cn, styles, useColumnWidths, useCompact } from '@hyperpane/ui';
+import { Button, Checkbox, Chip, ColumnResizer, HeaderBar, Input, ToolButton, cn, styles, useColumnWidths, useCompact, useMenu } from '@hyperpane/ui';
 import type { Proc, Signal } from '../shared/index.ts';
 import { ID, State, pct, size, useProcs } from './parts.tsx';
 
@@ -21,6 +21,7 @@ export function Processes({ user }: { user: string }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [mine, setMine] = useState(false);
   const wide = !useCompact();
+  const menu = useMenu();
 
   const rows = useMemo(() => {
     if (!list) return [];
@@ -54,7 +55,7 @@ export function Processes({ user }: { user: string }) {
     return out;
   }, [list, find, sort, tree, mine, user]);
 
-  const cols = useColumnWidths('activity.processes', { pid: 64, user: 96, cpu: 64, mem: 80, threads: 64, started: 88 }, { min: 40, max: 400 });
+  const cols = useColumnWidths('activity.processes', { pid: 72, user: 112, cpu: 72, mem: 88, threads: 72, started: 112 }, { min: 40, max: 400 });
   if (!list) return <State title="Reading the processes" />;
   const sel = list.find((p) => p.pid === selected) ?? null;
   const signal = async (p: Proc, sig: Signal, word: string) => {
@@ -81,38 +82,53 @@ export function Processes({ user }: { user: string }) {
     // between the bar and the names however the pixels round.
     <th
       className={cn(
-        'sticky top-0 z-10 h-7 bg-[var(--node-bg)] px-2 font-medium text-[var(--node-muted)] shadow-[inset_0_-1px_0_var(--node-border)]',
+        'sticky top-0 z-10 h-8 bg-[var(--node-bg)] px-2.5 text-xs font-medium text-[var(--node-muted)] shadow-[inset_0_-1px_0_var(--hairline)]',
         'before:pointer-events-none before:absolute before:inset-x-0 before:-top-1 before:h-1 before:bg-[var(--node-bg)]',
         cls,
       )}
     >
       <button
         type="button"
-        className={cn('rounded-chip inline-flex items-center gap-1 transition-colors duration-100 hover:text-[var(--node-fg)]', styles.focusRing)}
+        className={cn('rounded-chip inline-flex items-center gap-1 tabular-nums transition-colors duration-100 hover:text-[var(--node-fg)]', styles.focusRing)}
         onClick={() => setSort((s) => ({ key, desc: s.key === key ? !s.desc : key !== 'name' && key !== 'user' }))}
       >
         {title}
-        {sort.key === key && (sort.desc ? <ArrowDown className="size-3" /> : <ArrowUp className="size-3" />)}
+        {sort.key === key && (sort.desc ? <ArrowDown variant="outline" className="size-3" /> : <ArrowUp variant="outline" className="size-3" />)}
       </button>
       {key !== 'name' && <ColumnResizer {...cols.resizer(key, 'start')} />}
     </th>
   );
 
-  const td = 'h-7 truncate px-2 touch:h-10';
+  const td = 'h-8 truncate px-2.5 touch:h-10';
+  const rowMenu = (e: React.MouseEvent, p: Proc) => {
+    setSelected(p.pid);
+    menu.open(e, [
+      { label: `End ${p.name}`, run: () => void signal(p, 'TERM', 'End') },
+      { label: 'Force quit', danger: true, run: () => void signal(p, 'KILL', 'Force quit') },
+      null,
+      { label: 'Copy command', run: () => void navigator.clipboard?.writeText(p.command || p.name) },
+      { label: 'Copy pid', run: () => void navigator.clipboard?.writeText(String(p.pid)) },
+    ]);
+  };
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <Toolbar>
-        <div className="relative min-w-32 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput className="w-full pl-7" placeholder="Name, command or pid" value={find} onChange={(e) => setFind(e.target.value)} />
-        </div>
-        <Checkbox className="ms-1 flex-none gap-1.5 text-xs text-[var(--node-muted)]" label="Mine" checked={mine} onCheckedChange={setMine} />
-        <ToolButton label={tree ? 'A list' : 'A tree (by parent)'} icon={ListTree} active={tree} onClick={() => setTree(!tree)} />
-        <span className="mx-1 flex-none text-2xs text-[var(--node-muted)] tabular-nums max-sm:hidden">{rows.length} processes</span>
-        <ToolbarSeparator />
-        <ToolButton label="End (SIGTERM)" icon={Square} disabled={!sel} onClick={() => sel && void signal(sel, 'TERM', 'End')} />
-        <ToolButton label="Force quit (SIGKILL)" icon={Skull} disabled={!sel} onClick={() => sel && void signal(sel, 'KILL', 'Force quit')} />
-      </Toolbar>
+      <HeaderBar className="gap-2 px-3">
+        <Input
+          variant="secondary"
+          size="sm"
+          containerClassName="min-w-32 flex-1"
+          icon={<Search variant="outline" className="size-4" />}
+          clearable
+          placeholder="Find by name, command or pid"
+          value={find}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFind(e.target.value)}
+        />
+        <Checkbox className="ms-1 flex-none gap-1.5 text-[13px] text-[var(--node-muted)]" label="Only mine" checked={mine} onCheckedChange={setMine} />
+        <ToolButton label={tree ? 'Show as a list' : 'Show as a tree (by parent)'} icon={ListTree} iconVariant="outline" active={tree} onClick={() => setTree(!tree)} />
+        <span className="ms-1 flex-none text-xs text-[var(--node-muted)] tabular-nums max-sm:hidden">
+          {rows.length.toLocaleString('en-US')} {rows.length === 1 ? 'process' : 'processes'}
+        </span>
+      </HeaderBar>
       <div className="min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
         <table className="w-full table-fixed border-separate border-spacing-0">
           <colgroup>
@@ -140,35 +156,65 @@ export function Processes({ user }: { user: string }) {
               <tr
                 key={p.pid}
                 onClick={() => setSelected(p.pid)}
+                onContextMenu={(e) => rowMenu(e, p)}
                 className={cn(
-                  'cursor-default [&>td:first-child]:rounded-s-control [&>td:last-child]:rounded-e-control',
-                  selected === p.pid ? '[&>td]:bg-[var(--node-selection,var(--node-hover))]' : 'hover:[&>td]:bg-[var(--node-hover)]',
+                  'cursor-default text-[13px] [&>td:first-child]:rounded-s-control [&>td:last-child]:rounded-e-control',
+                  selected === p.pid
+                    ? '[&>td]:bg-[var(--state-selected-accent)] hover:[&>td]:bg-[var(--state-selected-accent-hover)]'
+                    : 'hover:[&>td]:bg-[var(--node-hover)]',
                 )}
                 title={p.command}
               >
-                <td className={td} style={{ paddingLeft: 8 + depth * 12 }}>
-                  <span className="font-medium">{p.name}</span>
+                <td className={td} style={{ paddingLeft: 10 + depth * 14 }}>
+                  {depth > 0 && <span className="me-1.5 text-[var(--node-muted)] opacity-60">└</span>}
+                  {p.name}
                 </td>
                 <td className={cn(td, 'text-right text-[var(--node-muted)] tabular-nums')}>{p.pid}</td>
                 {wide && <td className={cn(td, 'text-[var(--node-muted)]')}>{p.user}</td>}
-                <td className={cn(td, 'text-right tabular-nums', p.cpu > 50 && 'text-[var(--ansi-3)]')}>{pct(p.cpu)}</td>
+                <td className={cn(td, 'text-right tabular-nums', p.cpu > 90 ? 'text-[var(--rose)]' : p.cpu > 50 && 'text-[var(--amber)]')}>{pct(p.cpu)}</td>
                 <td className={cn(td, 'text-right tabular-nums')}>{size(p.mem)}</td>
                 {wide && <td className={cn(td, 'text-right text-[var(--node-muted)] tabular-nums')}>{p.threads ?? ''}</td>}
-                {wide && <td className={cn(td, 'text-right text-[var(--node-muted)]')}>{p.started ? formatAgo(p.started) : ''}</td>}
+                {wide && <td className={cn(td, 'text-right text-[var(--node-muted)] tabular-nums')}>{p.started ? formatAgo(p.started) : ''}</td>}
               </tr>
             ))}
           </tbody>
         </table>
-        {!rows.length && <p className="px-2 py-3 text-[var(--node-muted)]">No processes match</p>}
+        {!rows.length && (
+          <p className="m-0 flex h-16 items-center justify-center text-[13px] text-[var(--node-muted)]">
+            {find.trim() ? `No process matches “${find.trim()}”` : 'No processes of yours'}
+          </p>
+        )}
       </div>
-      {sel && (
-        <div className="flex h-8 flex-none items-center gap-3 border-t border-[var(--node-border)] px-3 touch:h-10">
-          <span className="min-w-0 flex-1 truncate font-mono text-2xs select-text" title={sel.command}>
-            {sel.command}
-          </span>
-          <span className="flex-none text-2xs text-[var(--node-muted)] tabular-nums">parent {sel.ppid}</span>
-        </div>
-      )}
+      <div className="flex h-11 flex-none items-center gap-3 border-t border-[var(--hairline)] px-3 touch:h-12">
+        {sel ? (
+          <>
+            <span className="flex min-w-0 flex-1 items-center gap-2">
+              <span className="flex-none font-medium">{sel.name}</span>
+              <Chip className="flex-none">pid {sel.pid}</Chip>
+              <Chip className="flex-none max-sm:hidden">parent {sel.ppid}</Chip>
+              <span className="min-w-0 truncate font-mono text-xs text-[var(--node-muted)] select-text max-sm:hidden" title={sel.command}>
+                {sel.command}
+              </span>
+            </span>
+            <Button variant="secondary" size="sm" className="flex-none" onClick={() => void signal(sel, 'TERM', 'End')} title="End (SIGTERM): it can save first">
+              <Power variant="outline" /> End
+            </Button>
+            <Button
+              variant="secondary"
+              color="destructive"
+              size="sm"
+              className="flex-none"
+              onClick={() => void signal(sel, 'KILL', 'Force quit')}
+              title="Force quit (SIGKILL): it ends at once"
+            >
+              <Skull variant="outline" /> Force quit
+            </Button>
+          </>
+        ) : (
+          <span className="text-xs text-[var(--node-muted)]">Pick a process to end it, or right-click one</span>
+        )}
+      </div>
+      {menu.element}
     </div>
   );
 }

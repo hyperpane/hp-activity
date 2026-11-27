@@ -8,10 +8,10 @@
 
 import { useEffect, useState } from 'react';
 import { formatAgo, useHost } from '@hyperpane/sdk/client';
-import { Tabs, Toolbar } from '@hyperpane/ui';
+import { Dot, HeaderBar, SegmentedControl } from '@hyperpane/ui';
 import type { Machine, Sample, WatchEvent } from '../shared/index.ts';
 import { Overview } from './Overview.tsx';
-import { ID, State, pct, size } from './parts.tsx';
+import { C, ID, State, pct, size } from './parts.tsx';
 import { Processes } from './Processes.tsx';
 
 type Tab = 'overview' | 'processes';
@@ -49,40 +49,43 @@ export function ActivityView() {
   const now = history.at(-1);
 
   return (
-    <div className="flex h-full flex-col text-xs text-[var(--node-fg)]">
-      <Toolbar className="gap-3">
-        <Tabs
-          variant="pills"
+    <div className="flex h-full flex-col text-[13px] leading-5 text-[var(--node-fg)]">
+      <HeaderBar className="gap-3 px-3">
+        <SegmentedControl
+          size="sm"
           label="View"
           value={tab}
-          onValueChange={setTab}
-          items={[
+          onValueChange={(v) => setTab(v as Tab)}
+          options={[
             { value: 'overview', label: 'Overview' },
             { value: 'processes', label: 'Processes' },
           ]}
         />
-        <span className="min-w-0 flex-1 truncate text-2xs text-[var(--node-muted)]" title={`${machine.os} · ${machine.arch}`}>
-          <span className="font-medium text-[var(--node-fg)]">{machine.hostname.replace(/\.local$/, '')}</span> · {machine.cpu} · {machine.cores} cores ·{' '}
-          {size(machine.memory)} · up {formatAgo(machine.bootedAt).replace(/ ago$/, '')}
+        <span className="flex min-w-0 flex-1 items-baseline gap-2 truncate" title={`${machine.os} · ${machine.arch}`}>
+          <span className="flex-none font-medium">{machine.hostname.replace(/\.local$/, '')}</span>
+          <span className="min-w-0 truncate text-xs text-[var(--node-muted)] tabular-nums max-sm:hidden">
+            {machine.cpu} · {machine.cores} cores · {size(machine.memory)} · up {formatAgo(machine.bootedAt).replace(/ ago$/, '')}
+          </span>
         </span>
         {/* The overview's cards say these too: a narrow window does without. */}
         {now && (
-          <span className="flex flex-none gap-3 text-2xs text-[var(--node-muted)] tabular-nums max-sm:hidden">
-            <span>
-              CPU <span className="font-medium text-[var(--node-fg)]">{pct(now.cpu.total)}</span>
-            </span>
-            <span>
-              Memory <span className="font-medium text-[var(--node-fg)]">{pct((now.mem.used / now.mem.total) * 100)}</span>
-            </span>
-            {now.gpus[0]?.util != null && (
-              <span>
-                GPU <span className="font-medium text-[var(--node-fg)]">{pct(now.gpus[0].util)}</span>
-              </span>
-            )}
+          <span className="flex flex-none items-center gap-4 text-xs text-[var(--node-muted)] tabular-nums max-md:hidden">
+            <Stat color={C.cpu} label="CPU" value={pct(now.cpu.total)} />
+            <Stat color={C.mem} label="Memory" value={pct((now.mem.used / now.mem.total) * 100)} />
+            {now.gpus[0]?.util != null && <Stat color={C.gpu} label="GPU" value={pct(now.gpus[0].util)} />}
           </span>
         )}
-      </Toolbar>
+      </HeaderBar>
       {tab === 'overview' ? <Overview history={history} machine={machine} onProcesses={() => setTab('processes')} /> : <Processes user={machine.user} />}
     </div>
+  );
+}
+
+function Stat({ color, label, value }: { color: string; label: string; value: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <Dot color={color} />
+      {label} <span className="font-medium text-[var(--node-fg)]">{value}</span>
+    </span>
   );
 }

@@ -2,7 +2,7 @@
   "manifest": 1,
   "id": "activity",
   "name": "Activity",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "publisher": "hyperpane",
   "description": "What your server is doing, as Activity Monitor or htop shows it: CPU per core, memory, GPU, network and disk, charted as they go, and its processes to sort, search and end.",
   "icon": "icon.svg",
