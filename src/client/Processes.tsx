@@ -112,7 +112,7 @@ export function Processes({ user }: { user: string }) {
   };
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <HeaderBar className="gap-2 px-3">
+      <HeaderBar className="gap-2 px-2">
         <Input
           variant="secondary"
           size="sm"
@@ -185,10 +185,12 @@ export function Processes({ user }: { user: string }) {
           </p>
         )}
       </div>
-      <div className="flex h-11 flex-none items-center gap-3 border-t border-[var(--hairline)] px-3 touch:h-12">
+      {/* The buttons 8px in from the ends, as a bar's are; the words on the
+          table's names' line, 16px in. */}
+      <div className="flex h-11 flex-none items-center gap-3 border-t border-[var(--hairline)] px-2 touch:h-12">
         {sel ? (
           <>
-            <span className="flex min-w-0 flex-1 items-center gap-2">
+            <span className="flex min-w-0 flex-1 items-center gap-2 ps-2">
               <span className="flex-none font-medium">{sel.name}</span>
               <Chip className="flex-none">pid {sel.pid}</Chip>
               <Chip className="flex-none max-sm:hidden">parent {sel.ppid}</Chip>
@@ -211,7 +213,7 @@ export function Processes({ user }: { user: string }) {
             </Button>
           </>
         ) : (
-          <span className="text-xs text-[var(--node-muted)]">Pick a process to end it, or right-click one</span>
+          <span className="ps-2 text-xs text-[var(--node-muted)]">Pick a process to end it, or right-click one</span>
         )}
       </div>
       {menu.element}

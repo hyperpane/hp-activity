@@ -4,7 +4,7 @@
 
 import { useMemo } from 'react';
 import { ChevronRight, Cpu, HardDrive, MemoryStick, Monitor, Network } from '@hyperpane/icons';
-import { Button, Card as KitCard, SectionHeader, cn } from '@hyperpane/ui';
+import { Button, Card as KitCard, SectionHeader, cn, styles } from '@hyperpane/ui';
 import type { Machine, Sample } from '../shared/index.ts';
 import { Bar, Chart } from './chart.tsx';
 import { C, Card, Legend, State, pct, rate, size, useProcs } from './parts.tsx';
@@ -23,7 +23,7 @@ export function Overview({ history, machine, onProcesses }: { history: Sample[];
         <Card icon={Cpu} title="CPU" value={`${pct(now.cpu.total)} · load ${now.cpu.load.map((l) => l.toFixed(2)).join(' ')}`} className="row-span-2">
           <Chart series={[{ label: 'CPU', values: s((x) => x.cpu.total), color: C.cpu }]} max={100} format={pct} />
           <div>
-            <div className="mb-1.5 flex h-4 items-center text-[11px] leading-4 font-medium tracking-[0.06em] text-[var(--node-muted)] uppercase">
+            <div className={cn('mb-1.5 flex h-4 items-center', styles.text.label)}>
               Cores <span className="ms-1.5 font-normal tracking-normal tabular-nums opacity-70">{cores.length}</span>
             </div>
             <div className={cn('grid gap-x-5 gap-y-2', cores.length > 8 ? 'grid-cols-2' : 'grid-cols-1')}>

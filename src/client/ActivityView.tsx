@@ -50,7 +50,7 @@ export function ActivityView() {
 
   return (
     <div className="flex h-full flex-col text-[13px] leading-5 text-[var(--node-fg)]">
-      <HeaderBar className="gap-3 px-3">
+      <HeaderBar className="gap-3 px-2">
         <SegmentedControl
           size="sm"
           label="View"
